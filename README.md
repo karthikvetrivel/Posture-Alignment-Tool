@@ -1,1 +1,1 @@
-# PostureAlignmentTool
+# Posture Alignment Tool
