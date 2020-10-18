@@ -3,12 +3,19 @@ let poseNet;
 let pose;
 let skeleton;
 
+
+// Global Variables
+let ellipseSize = 16;
+
 function setup() {
   createCanvas(640, 480);
   video = createCapture(VIDEO);
   video.hide();
   poseNet = ml5.poseNet(video, modelLoaded);
   poseNet.on('pose', gotPoses);
+
+  strokeWeight(2);
+  stroke(255);
 }
 
 function gotPoses(poses) {
@@ -20,22 +27,31 @@ function gotPoses(poses) {
 }
 
 function checkAlignment(bodyOne, bodyTwo) {
-  ellipse(bodyOne.x, bodyOne.y, 32);
-  ellipse(bodyTwo.x, bodyTwo.y, 32); 
-  strokeWeight(2);
-  stroke(255);
   line(bodyOne.x, bodyOne.y, bodyTwo.x, bodyTwo.y);
-
 
   if (Math.abs(bodyOne.y - bodyTwo.y) <= 20) {
     fill(0, 255, 0);
-    console.log("Working!");
-    console.log(bodyOne.x);
   } else {
     fill(255, 0, 0);
-    console.log("Working!");
   }
 
+  ellipse(bodyOne.x, bodyOne.y, ellipseSize);
+  ellipse(bodyTwo.x, bodyTwo.y, ellipseSize); 
+}
+
+function neckPosture() {
+  let nosePositionY = pose.nose.y;
+  let shoulderPositionY = (pose.rightShoulder.y + pose.leftShoulder.y)/2;
+  let shoulderPositionX = (pose.rightShoulder.x + pose.leftShoulder.x)/2;
+
+  line(pose.nose.x, pose.nose.y, shoulderPositionX, shoulderPositionY);
+  if (nosePositionY - shoulderPositionY >= -100) {
+    fill(255, 0, 0);
+  } else {
+    fill(0, 255, 0);
+  }
+
+  ellipse(pose.nose.x, pose.nose.y, ellipseSize);
 }
 
 function modelLoaded() {
@@ -54,14 +70,16 @@ function draw() {
     // fill(0, 0, 255);
     // ellipse(pose.rightWrist.x, pose.rightWrist.y, 32);
     // ellipse(pose.leftWrist.x, pose.leftWrist.y, 32);
-
-
     
     let shoulderR = pose.rightShoulder;
     let shoulderL = pose.leftShoulder;
 
+    neckPosture(); 
     checkAlignment(shoulderR, shoulderL);
-    
+    checkAlignment(pose.rightEar, pose.leftEar);
+
+
+
     // for (let i = 0; i < pose.keypoints.length; i++) {
     //   let x = pose.keypoints[i].position.x;
     //   let y = pose.keypoints[i].position.y;
